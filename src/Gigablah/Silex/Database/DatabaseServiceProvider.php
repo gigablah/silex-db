@@ -7,7 +7,7 @@ use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Database\Capsule;
+use Illuminate\Database\Capsule\Manager;
 
 /**
  * Integrates the Illuminate Database component from Laravel into Silex.
@@ -36,7 +36,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
         $app['illuminate.db.options.initializer'] = $app->protect(function () use ($app) {
             if (!isset($app['illuminate.db.options'])) {
                 $app['illuminate.db.options'] = array(
-                    'default' => array();
+                    'default' => array()
                 );
             }
 
@@ -54,11 +54,13 @@ class DatabaseServiceProvider implements ServiceProviderInterface
         $app['illuminate.capsule'] = $app->share(function ($app) {
             $app['illuminate.db.options.initializer']();
 
-            $capsule = new Capsule();
+            $capsule = new Manager();
 
             foreach ($app['illuminate.db.options'] as $name => $options) {
                 $capsule->addConnection($options, $name);
             }
+
+            return $capsule;
         });
     }
 
